@@ -481,9 +481,11 @@ class Parser:
 
     # primary ::= IDENTIFIER | INT_LITERAL | KW_TRUE | KW_FALSE | LEFT_PAREN expression RIGHT_PAREN
     def parse_primary(self) -> Expr:
-        if self.match(TokenKind.LEFT_PAREN) is not None: #parenteses de abertura
+        if self.check(TokenKind.LEFT_PAREN): #parenteses de abertura
+            left_paren = self.expect(TokenKind.LEFT_PAREN)
             expr = self.parse_expression()
-            self.expect(TokenKind.RIGHT_PAREN)
+            right_paren = self.expect(TokenKind.RIGHT_PAREN)
+            expr.span = self._span(left_paren, right_paren)
             return expr # retorna a expressão entre parênteses
         
         if self.check(TokenKind.IDENTIFIER): # verifica se o token atual é um identificador
