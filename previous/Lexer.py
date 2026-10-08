@@ -109,7 +109,7 @@ class Lexer:
         start_line, start_col = self.line, self.column
         lexeme = ''
 
-        while self.pos < len(self.source) and (self.source[self.pos].isalpha() or self.source[self.pos].isdigit() or self.source[self.pos] == '_'):
+        while self.pos < len(self.source) and (self.source[self.pos].isascii() and (self.source[self.pos].isalpha() or self.source[self.pos].isdigit() or self.source[self.pos] == '_')):
 
             lexeme += self.source[self.pos]    # guarda o caracter na string lexeme
 
