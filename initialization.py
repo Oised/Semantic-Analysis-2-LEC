@@ -82,18 +82,31 @@ class InitializationAnalyzer:
                 else:
                     incoming = self._meet_predecessors(block_id, facts)
                 outgoing = transfer(self.cfg.blocks[block_id], incoming)
+                
+                # Faz a verificação se o estado de entrada ou saída mudou em relação ao estado anterior. Se houver mudança,
+                # atualiza o estado e marca 'changed' como True para indicar que a análise precisa continuar.
 
-                # TODO: compare incoming/outgoing com os estados anteriores.
-                # Grave os novos estados e sinalize changed quando houver
-                # alteração. A convergência depende dos conjuntos, não de um
-                # número fixo de passadas. Não emita erros neste laço.
-                raise NotImplementedError("implemente a atualização até ponto fixo")
+                if incoming != facts.initialized_in[block_id]:
+                    facts.initialized_in[block_id] = incoming
+                    changed = True
+                if outgoing != facts.initialized_out[block_id]:
+                    facts.initialized_out[block_id] = outgoing
+                    changed = True
+
         return facts
 
     def _meet_predecessors(
         self, block_id: BlockId, facts: InitializationFacts,
     ) -> set[Symbol]:
         predecessors = self.cfg.blocks[block_id].predecessors & self.reachable
-        # TODO: interseção dos OUT destes predecessores. Não use união.
-        # Nunca modifique um conjunto OUT ao calcular a interseção.
-        raise NotImplementedError("implemente a junção de inicialização")
+
+        if not predecessors:
+            return set(self.universe)
+
+        # Mantém apenas símbolos inicializados em todos os predecessores.
+        
+        result = facts.initialized_out[next(iter(predecessors))].copy()
+        for pred in predecessors:
+            result.intersection_update(facts.initialized_out[pred])
+
+        return result
